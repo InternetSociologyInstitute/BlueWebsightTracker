@@ -1,0 +1,60 @@
+<html>
+    <body>
+      <div>
+        <canvas id="myChart"></canvas>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script type="module">
+          import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+          import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-lite.js";
+          var sorter = function(a, b) {
+            if (a.timeStamp < b.timeStamp) {
+              return -1;
+            }
+            return 1;
+          }
+          var getMetrics = function(documents) {
+            var metrics = []
+            for (var i=0; i < documents.length-1; i++) {
+              var totalPosts = documents[i+1].totalPosts - documents[i].totalPosts;
+              var totalTopics = documents[i+1].totalTopics - documents[i].totalTopics;
+              var date = documents[i].timeStamp.substring(0, 10)
+              metrics.push({'posts': totalPosts, 'topics': totalTopics, 'date': date})
+            }
+            return metrics;
+          }
+          const firebaseConfig = {
+            apiKey: "AIzaSyAWd7dOO7NK9JzpYRtk4bDt4GcL6NhU79A",
+            authDomain: "bluesightcounter.firebaseapp.com",
+            projectId: "bluesightcounter",
+            storageBucket: "bluesightcounter.appspot.com",
+            messagingSenderId: "646396926532",
+            appId: "1:646396926532:web:f02057a4a193e6cdf53a11"
+          };
+        
+          // Initialize Firebase
+          const app = initializeApp(firebaseConfig);
+          const db = getFirestore(app, "bluesightcounter");
+          const counts = collection(db, 'bluesightcounter');
+          const countSnapshot = await getDocs(counts);
+          const countList = countSnapshot.docs.map(doc => doc.data());
+          countList.sort(sorter);
+          const metrics = getMetrics(countList);
+          const ctx = document.getElementById('myChart');
+
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              datasets: [{
+                label: "Number of Posts",
+                data: metrics.map((metric) => ({x: metric.date, y: metric.posts}))
+              }, {
+                label: "Number of Topics",
+                data: metrics.map((metric) => ({x: metric.date, y: metric.topics}))
+              }]
+            },
+          });
+
+        </script>
+    </body>
+</html>
