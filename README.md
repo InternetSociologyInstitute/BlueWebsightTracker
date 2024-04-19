@@ -1,4 +1,6 @@
 # BlueWebsightTracker
+https://internetsociologyinstitute.github.io/BlueWebsightTracker/
+
 ## Background
 The Blue Websight (https://websight.blue/) is a web forum of an internet subculture that has had many iterations over the past 25 years (GameFAQs forums to Luelinks to End of the Internet to its current location). The community has always had a very private attitude which has gotten more severe over time. As such, recruitment to the community has slowly changed from welcome, to looked down upon, and finally made impossible. This lack of recruitment also means that the community is ultimately moribund due to a slowly dwindling userbase which this project aims to track.
 
