@@ -15,13 +15,21 @@
           }
           var getMetrics = function(documents) {
             var metrics = []
+            var rollingMetrics = [];
             for (var i=0; i < documents.length-1; i++) {
-              var totalPosts = documents[i+1].totalPosts - documents[i].totalPosts;
-              var totalTopics = documents[i+1].totalTopics - documents[i].totalTopics;
-              var date = documents[i].timeStamp.substring(0, 10)
-              metrics.push({'posts': totalPosts, 'topics': totalTopics, 'date': date})
+              var totalPosts = parseInt(documents[i+1].totalPosts - documents[i].totalPosts);
+              var totalTopics = parseInt(documents[i+1].totalTopics - documents[i].totalTopics);
+              var date = documents[i].timeStamp.substring(0, 10);
+              metrics.push({'posts': totalPosts, 'topics': totalTopics, 'date': date});
+              if (i >= 6) {
+                var lastSevenDayTotals = metrics.slice(i-6, i+1);
+                var rollingAveragePosts = lastSevenDayTotals.map((document) => (document.posts)).reduce((a, b) => a + b, 0) / 7;
+                var rollingAverageTopics = lastSevenDayTotals.map((document) => (document.topics)).reduce((a, b) => a + b, 0) / 7;
+                var rollingMetric = {'rollingPosts': rollingAveragePosts, 'rollingTopics': rollingAverageTopics, 'date': date};
+                rollingMetrics.push(rollingMetric);
+              }
             }
-            return metrics;
+            return {'metrics': metrics, 'rollingMetrics': rollingMetrics};
           }
           const firebaseConfig = {
             apiKey: "AIzaSyAWd7dOO7NK9JzpYRtk4bDt4GcL6NhU79A",
@@ -47,12 +55,18 @@
             data: {
               datasets: [{
                 label: "Number of Posts",
-                data: metrics.map((metric) => ({x: metric.date, y: metric.posts}))
+                data: metrics.metrics.map((metric) => ({x: metric.date, y: metric.posts}))
               }, {
                 label: "Number of Topics",
-                data: metrics.map((metric) => ({x: metric.date, y: metric.topics}))
+                data: metrics.metrics.map((metric) => ({x: metric.date, y: metric.topics}))
+              }, {
+                label: "Number of Posts (7 Day Rolling Average)",
+                data: metrics.rollingMetrics.map((metric) => ({x: metric.date, y: metric.rollingPosts}))
+              }, {
+                label: "Number of Topics (7 Day Rolling Average)",
+                data: metrics.rollingMetrics.map((metric) => ({x: metric.date, y: metric.rollingTopics}))
               }]
-            },
+            }
           });
 
         </script>
